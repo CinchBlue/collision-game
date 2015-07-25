@@ -20,7 +20,7 @@ LIBS = -lmingw32 \
 -lSDL2_ttf \
 -lSDL2_mixer 
 
-source := main base/TexturePool
+source := main base/TexturePool base/Unit
 
 
 ###END OF CONFIG
@@ -31,10 +31,17 @@ source := $(addprefix src/, $(source))
 CXXFLAGS := $(CXXFLAGS) $(INCLUDE) $(LIBDIR) $(LIBS)
 
 
-all: main.exe
+all: win-clean main.exe
 
 main.exe: $(source)
 	$(CXX) $^ $(CPPFLAGS) $(CXXFLAGS) -o $(addprefix bin/, $@) 
 	
 src/%.o: src/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	
+win-clean:
+	cd src
+	del /S *.o
+	cd ..
+	
+win-make: win-clean main.exe 
