@@ -98,9 +98,15 @@ public:
 
 class BaseSystem {
 public:
-  BaseSystem(const char* title, size_t w, size_t h, Uint32 flags) :
-    window(new Window(title, w, h, flags)) {
+  BaseSystem(const char* title, size_t w, size_t h, Uint32 flags) {
+      if(SDL_Init( SDL_INIT_EVERYTHING) < 0)
+      {
+        std::cout << "SDL initialization error.\n";
+        throw std::runtime_error(SDL_GetError());
+      }
+
       //Create the default renderer
+      window = std::unique_ptr<Window>(new Window(title, w, h, flags)) ;
       renderer = std::unique_ptr<Renderer>(new Renderer(window.get()->get()));
 
       //SDL_image subsystem init
@@ -128,6 +134,7 @@ public:
     IMG_Quit();
     TTF_Quit();
     Mix_Quit();
+    SDL_Quit();
   }
 
   SDL_Window* get_window() const noexcept {
