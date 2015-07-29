@@ -8,7 +8,6 @@
 #include "SDL2/SDL_mixer.h"
 #include "base/system.h"
 #include "base/TexturePool.h"
-#include "base/Unit.h"
 #include "Paddle.h"
 #include "Ball.h"
 

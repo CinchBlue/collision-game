@@ -1,7 +1,7 @@
 ###CONFIG
 CXX = g++
 CXXFLAGS := -std=c++11
-CPPFLAGS = -Wall -Wextra -pedantic 
+CPPFLAGS = -Wall -Wextra -pedantic -O2
 INCLUDE = -IC:\Users\Austin\Desktop\Collision\depend\SDL2-2.0.3\i686-w64-mingw32\include \
 -IC:\Users\Austin\Desktop\Collision\depend\SDL2-2.0.3\i686-w64-mingw32\include\SDL2 \
 -IC:\Users\Austin\Desktop\Collision\depend\SDL2_image-2.0.0\i686-w64-mingw32\include \
