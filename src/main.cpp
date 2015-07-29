@@ -56,9 +56,17 @@ public:
   Text(SDL_Renderer* renderer, Font& font, SDL_Color color) :
     renderer(renderer),
     font(font),
-    color(color) { }
+    color(color) { texture = nullptr; }
+
+   ~Text() {
+    SDL_DestroyTexture(texture);
+   }
 
   void render_text(std::string str) {
+    if (texture != nullptr) {
+      SDL_DestroyTexture(texture);
+    }
+
     SDL_Surface* text_surface = TTF_RenderText_Blended(font.get_font(), str.c_str(), color);
     if (text_surface == nullptr) {
       std::cout << "Unable to render text surface; text: " << str << "; " << TTF_GetError() << std::endl;
@@ -77,6 +85,7 @@ public:
       }
     }
   }
+
 
   SDL_Texture* get_texture() {return texture;}
   Dim2 get_dim() {return dim;}
@@ -145,16 +154,16 @@ int main(int argc, char** argv) {
     SDL_PumpEvents();
 
     if (keys[SDL_SCANCODE_UP]) {
-      p1.set_speed(0, -20000 * delta.count());
+      p1.set_speed(0, -35000 * delta.count());
     }
     if (keys[SDL_SCANCODE_DOWN]) {
-      p1.set_speed(0, 20000 * delta.count());
+      p1.set_speed(0, 35000 * delta.count());
     }
     if (keys[SDL_SCANCODE_LEFT]) {
-      p1.set_speed(-20000 * delta.count(), 0);
+      p1.set_speed(-35000 * delta.count(), 0);
     }
     if (keys[SDL_SCANCODE_RIGHT]) {
-      p1.set_speed(20000 * delta.count(), 0);
+      p1.set_speed(35000 * delta.count(), 0);
     }
 
     if (!keys[SDL_SCANCODE_UP] &&
@@ -165,16 +174,16 @@ int main(int argc, char** argv) {
     }
 
     if (keys[SDL_SCANCODE_W]) {
-      p2.set_speed(0, -20000 * delta.count());
+      p2.set_speed(0, -35000 * delta.count());
     }
     if (keys[SDL_SCANCODE_S]) {
-      p2.set_speed(0, 20000 * delta.count());
+      p2.set_speed(0, 35000 * delta.count());
     }
     if (keys[SDL_SCANCODE_A]) {
-      p2.set_speed(-20000 * delta.count(), 0);
+      p2.set_speed(-35000 * delta.count(), 0);
     }
     if (keys[SDL_SCANCODE_D]) {
-      p2.set_speed(20000 * delta.count(), 0);
+      p2.set_speed(35000 * delta.count(), 0);
     }
 
     if (!keys[SDL_SCANCODE_W] &&

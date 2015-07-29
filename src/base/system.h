@@ -63,8 +63,8 @@ public:
   Renderer(SDL_Window* window) {
     renderer = SDL_CreateRenderer(window,
                                   -1,
-                                  SDL_RENDERER_ACCELERATED
-                                  | SDL_RENDERER_TARGETTEXTURE);
+                                  SDL_RENDERER_ACCELERATED |
+                                  SDL_RENDERER_TARGETTEXTURE);
     if (renderer == nullptr) {
       std::cerr << "Renderer creation error.\n";
       throw std::runtime_error(SDL_GetError());
