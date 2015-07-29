@@ -31,13 +31,20 @@ source := $(addprefix src/, $(source))
 CXXFLAGS := $(CXXFLAGS) $(INCLUDE) $(LIBDIR) $(LIBS)
 
 
-all: win-clean main.exe
+all: clean main.exe
+
+w: win-clean main.exe
 
 main.exe: $(source)
-	$(CXX) $^ $(CPPFLAGS) $(CXXFLAGS) -o $(addprefix bin/, $@) 
+	$(CXX) -static-libgcc -static-libstdc++ $^ $(CPPFLAGS) $(CXXFLAGS) -o $(addprefix bin/, $@) 
 	
 src/%.o: src/%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	
+clean:
+	cd src
+	rm -rf *.o
+	cd ..
 	
 win-clean:
 	cd src
