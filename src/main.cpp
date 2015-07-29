@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
+#include <thread>
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_mixer.h"
@@ -197,6 +198,11 @@ int main(int argc, char** argv) {
       ball.set_accel(0,0);
     }
 
+    if (keys[SDL_SCANCODE_R]) {
+      p1score = 0;
+      p2score = 0;
+    }
+
     p1.update(delta.count());
     p2.update(delta.count());
 
@@ -244,7 +250,7 @@ int main(int argc, char** argv) {
     text_texture = text.get_texture();
     SDL_SetTextureBlendMode(text_texture, SDL_BLENDMODE_BLEND);
 
-    while ((std::chrono::high_resolution_clock::now() - t2).count() < 0.016666f) {}
+    std::this_thread::sleep_until(t2 + std::chrono::microseconds(16666));
 
     delta = std::chrono::high_resolution_clock::now() - t2;
     t2 = std::chrono::high_resolution_clock::now();
