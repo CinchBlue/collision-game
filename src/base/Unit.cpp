@@ -62,10 +62,10 @@ void Unit::update(float delta) {
     set_speed(-0, get_speed().y);
   }
 
-  if (get_speed().y > 350) {
-    set_speed(get_speed().x, 350);
-  } else if (get_speed().y < -350) {
-    set_speed(get_speed().x, -350);
+  if (get_speed().y > 450) {
+    set_speed(get_speed().x, 450);
+  } else if (get_speed().y < -450) {
+    set_speed(get_speed().x, -450);
   }
 
   pos.x += speed.x * delta;

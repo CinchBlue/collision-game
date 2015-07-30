@@ -3,101 +3,25 @@
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 #include <thread>
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_mixer.h"
+
 #include "base/system.h"
 #include "base/TexturePool.h"
+#include "base/Text.h"
 #include "Paddle.h"
 #include "Ball.h"
 
-/*
+
 Mix_Music *gMusic = nullptr;
 
 Mix_Chunk *gScratch = nullptr;
 Mix_Chunk *gHigh = nullptr;
 Mix_Chunk *gMedium = nullptr;
 Mix_Chunk *gLow = nullptr;
-*/
-class Font {
-public:
-  Font(const char* path, size_t size = 12) {
-    open_font(path, size);
-  }
-
-  ~Font() {
-    TTF_CloseFont(font);
-  }
-
- void open_font(const char* path, size_t size = 12) {
-    font = TTF_OpenFont(path, size);
-    if (font == nullptr) {
-      std::cout << "Failed to load font from " << path << "; " << TTF_GetError() << std::endl;
-      throw std::runtime_error(TTF_GetError());
-    } else {
-      return;
-    }
-  }
-
-  TTF_Font* get_font() {return font;}
-
-private:
-  TTF_Font* font;
-};  
-
-class Text {
-private:
-  struct Dim2 {
-    int x;
-    int y;
-  };
-public:
-  Text(SDL_Renderer* renderer, Font& font, SDL_Color color) :
-    renderer(renderer),
-    font(font),
-    color(color) { texture = nullptr; }
-
-   ~Text() {
-    SDL_DestroyTexture(texture);
-   }
-
-  void render_text(std::string str) {
-    if (texture != nullptr) {
-      SDL_DestroyTexture(texture);
-    }
-
-    SDL_Surface* text_surface = TTF_RenderText_Blended(font.get_font(), str.c_str(), color);
-    if (text_surface == nullptr) {
-      std::cout << "Unable to render text surface; text: " << str << "; " << TTF_GetError() << std::endl;
-      SDL_FreeSurface(text_surface);
-      throw std::runtime_error(TTF_GetError());
-    } else {
-      texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-      if (texture == nullptr) {
-        std::cout << "Unable to create texture from text surface; text: " << str << "; " << SDL_GetError() << std::endl;
-        SDL_FreeSurface(text_surface);
-        throw std::runtime_error(SDL_GetError()); 
-      } else {
-        dim.x = text_surface->w;
-        dim.y = text_surface->h;
-        SDL_FreeSurface(text_surface);
-      }
-    }
-  }
-
-
-  SDL_Texture* get_texture() {return texture;}
-  Dim2 get_dim() {return dim;}
-
-private:
-  Dim2 dim;
-  std::string str;
-  SDL_Renderer* renderer;
-  Font& font;
-  SDL_Color color;
-  SDL_Texture* texture;
-};
 
 int check_ball(Ball& ball) {
   if (ball.get_pos().x < 8) {
@@ -115,7 +39,7 @@ int main(int argc, char** argv) {
 
   std::srand(std::time(NULL));
 
-  BaseSystem base_system("SDL_Test!", 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  BaseSystem base_system("Extreme Pong", 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   TexturePool tp(base_system.get_renderer(), "img");
   tp.load_texture("bg.png");
   tp.load_texture("square.png");
@@ -126,6 +50,18 @@ int main(int argc, char** argv) {
   Font dejavu_sans_mono("font/DejaVu_Sans/DejaVuSansMono.ttf", 42);
   Text text(base_system.get_renderer(), dejavu_sans_mono, {128, 128, 0, 128});
   SDL_Texture* text_texture;
+
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    std::cout << "SDL_mixer could not initialize! SDL_mixer error: " << Mix_GetError() << std::endl;
+    throw std::runtime_error(Mix_GetError());
+  }
+
+  gMusic = Mix_LoadMUS("sound/Vortex Infinitum (Robo-Ky's Theme).mp3");
+  gScratch = Mix_LoadWAV("sound/scratch.wav");
+  gHigh = Mix_LoadWAV("sound/high.wav");
+  gMedium = Mix_LoadWAV("sound/medium.wav");
+  gLow = Mix_LoadWAV("sound/low.wav");
+
 
   SDL_SetRenderDrawBlendMode(base_system.get_renderer(), SDL_BLENDMODE_BLEND);
 
@@ -144,6 +80,8 @@ int main(int argc, char** argv) {
 
   const auto * keys = SDL_GetKeyboardState(NULL);
 
+  Mix_PlayMusic(gMusic, -1);
+
   while(!done) {
     while(SDL_PollEvent(&e)) {
       if(e.type == SDL_QUIT) {
@@ -154,16 +92,16 @@ int main(int argc, char** argv) {
     SDL_PumpEvents();
 
     if (keys[SDL_SCANCODE_UP]) {
-      p1.set_speed(0, -35000 * delta.count());
+      p1.set_speed(0, -60000 * delta.count());
     }
     if (keys[SDL_SCANCODE_DOWN]) {
-      p1.set_speed(0, 35000 * delta.count());
+      p1.set_speed(0, 60000 * delta.count());
     }
     if (keys[SDL_SCANCODE_LEFT]) {
-      p1.set_speed(-35000 * delta.count(), 0);
+      p1.set_speed(-60000 * delta.count(), 0);
     }
     if (keys[SDL_SCANCODE_RIGHT]) {
-      p1.set_speed(35000 * delta.count(), 0);
+      p1.set_speed(60000 * delta.count(), 0);
     }
 
     if (!keys[SDL_SCANCODE_UP] &&
@@ -174,16 +112,16 @@ int main(int argc, char** argv) {
     }
 
     if (keys[SDL_SCANCODE_W]) {
-      p2.set_speed(0, -35000 * delta.count());
+      p2.set_speed(0, -60000 * delta.count());
     }
     if (keys[SDL_SCANCODE_S]) {
-      p2.set_speed(0, 35000 * delta.count());
+      p2.set_speed(0, 60000 * delta.count());
     }
     if (keys[SDL_SCANCODE_A]) {
-      p2.set_speed(-35000 * delta.count(), 0);
+      p2.set_speed(-60000 * delta.count(), 0);
     }
     if (keys[SDL_SCANCODE_D]) {
-      p2.set_speed(35000 * delta.count(), 0);
+      p2.set_speed(60000 * delta.count(), 0);
     }
 
     if (!keys[SDL_SCANCODE_W] &&
@@ -222,8 +160,12 @@ int main(int argc, char** argv) {
     if (collision_info.z < delta.count()/50) {
       remaining_time = 1.0f - collision_info.z;
       ball.update(collision_info.z * delta.count());
+      int speedx = static_cast<int>(ball.get_speed().x + 1);
+        if (speedx < 0) speedx = -speedx;
       ball.inv_accel(true, false);
       ball.inv_speed(true, false);
+      ball.add_speed(std::rand() % speedx - speedx / 2, p1.get_speed().y);
+      Mix_PlayChannel(-1, gHigh, 0);
       std::cout << "P1\n";
       std::cout << "RIGHT COLLISION TIME: " << collision_info.z << std::endl;
     } else {
@@ -231,14 +173,29 @@ int main(int argc, char** argv) {
       if (collision_info.z < delta.count()/50) {
         remaining_time = 1.0f - collision_info.z;
         ball.update(collision_info.z * delta.count());
+        int speedx = static_cast<int>(ball.get_speed().x + 1);
+          if (speedx < 0) speedx = -speedx;
         ball.inv_accel(true, false);
         ball.inv_speed(true, false);
+        ball.add_speed(std::rand() % speedx - speedx/2, p2.get_speed().y);
+        Mix_PlayChannel(-1, gLow, 0);
         std::cout << "P2\n";
         std::cout << "LEFT COLLISION TIME: " << collision_info.z << std::endl;
       } else {
         ball.update(delta.count());
       }
     }
+
+    //CALCULATE THE VOLUME ACCORDING TO THE SPEED
+    float speed = ball.get_speed().x * ball.get_speed().x +
+                  ball.get_speed().y * ball.get_speed().y;
+    if (speed < 0) {
+      speed = -speed;
+    }
+    speed = std::sqrt(speed);
+    int volume = static_cast<int>(speed / 4000.0 * 128);
+
+    Mix_VolumeMusic(volume);
     
     if(check_ball(ball) > 0) {
       //P2 SCORES
@@ -246,12 +203,14 @@ int main(int argc, char** argv) {
       ball.set_pos(1280/2 - 8, 720/2 - 8);
       ball.set_speed(0,0);
       ball.set_accel(0,0);
+      Mix_PlayChannel(-1, gScratch, 0);
     } else if (check_ball(ball) < 0) {
       //P1 SCORES
       ++p1score;
       ball.set_pos(1280/2 - 8, 720/2 - 8);
       ball.set_speed(0,0);
       ball.set_accel(0,0);
+      Mix_PlayChannel(-1, gScratch, 0);
     }
 
     score = std::to_string(p2score).append(std::string(" | ")).append(std::to_string(p1score));
@@ -290,6 +249,19 @@ int main(int argc, char** argv) {
 
     ++fps;
   }
+
+  Mix_FreeChunk(gScratch);
+  Mix_FreeChunk(gHigh);
+  Mix_FreeChunk(gMedium);
+  Mix_FreeChunk(gLow);
+  gScratch = nullptr;
+  gHigh = nullptr;
+  gMedium = nullptr;
+  gLow = nullptr;
+
+  Mix_FreeMusic(gMusic);
+  gMusic = nullptr;
+
 
   std::cout << "hi";
   return 0;
